@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tom's Diner Exercise - Final Fix</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background-color: #f4f7f6;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; 
+            padding: 5px 10px;
+        }
+
+        header { 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            gap: 15px; 
+            padding: 5px 0;
+            border-bottom: 1px solid #ddd;
+            flex-shrink: 0;
+        }
+        h1 { font-size: 1.1em; color: #2c3e50; }
+        .instruction { font-size: 0.8em; font-style: italic; color: #666; }
+
+        .main-layout {
+            display: flex;
+            flex: 1;
+            gap: 10px;
+            overflow: hidden;
+            margin: 5px 0;
+        }
+
+        #lyrics-container {
+            flex: 2.5;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: repeat(21, auto);
+            grid-auto-flow: column;
+            gap: 0px 20px;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.82em; 
+            line-height: 1.25;
+            border: 1px solid #ddd;
+        }
+
+        .verbs-column {
+            flex: 0.9;
+            background: #eef2f7;
+            padding: 8px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #ddd;
+        }
+
+        h2 { font-size: 0.9em; margin-bottom: 5px; color: #34495e; border-bottom: 1px solid #ccc; }
+        .lyrics-line { height: 1.25em; }
+
+        .gap {
+            font-weight: bold;
+            color: #95a5a6;
+            border-bottom: 1px solid #333;
+            min-width: 80px;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .correct-gap { color: #27ae60; border-bottom: none; transition: all 0.3s; }
+        .wrong-text { color: #e74c3c !important; font-weight: bold; }
+
+        .verb-item {
+            padding: 3px 8px;
+            margin: 1px 0;
+            background: white;
+            border: 1px solid #ccc;
+            cursor: pointer;
+            border-radius: 3px;
+            font-size: 0.78em;
+            transition: 0.2s;
+        }
+
+        .verb-item.selected { background-color: #3498db; color: white; border-color: #2980b9; }
+        .verb-item.completed { text-decoration: line-through; color: #bdc3c7; background: #f9f9f9; cursor: default; }
+
+        footer { text-align: center; padding: 5px; flex-shrink: 0; }
+
+        #music-control {
+            padding: 6px 30px;
+            background: #2c3e50;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        #congratulations {
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(39, 174, 96, 0.95);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            display: none;
+            z-index: 1000;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Suzanne Vega - Tom's Diner</h1>
+        <p class="instruction"> ---    Listen to the song and put verbs into the correct gaps   ---</p>
+    </header>
+
+    <div class="main-layout">
+        <div id="lyrics-container"></div>
+        <div class="verbs-column">
+            <h2>Verbs</h2>
+            <div id="verbs-list"></div>
+        </div>
+    </div>
+
+    <div id="congratulations"><h1>Congratulations!! 🎉</h1></div>
+
+    <footer>
+        <button id="music-control">Play / Pause Music</button>
+        <audio id="bg-music" src="toms_diner.mp3"></audio>
+    </footer>
+
+    <script>
+        const lyricLines = [
+            { text: "____________ in the morning", verb: "I am sitting" },
+            { text: "At the diner on the corner", verb: null },
+            { text: "____________ at the counter", verb: "I am waiting" },
+            { text: "For the man to pour the coffee", verb: null },
+            { text: "And he fills it only halfway", verb: null },
+            { text: "And before I even argue", verb: null },
+            { text: "_____________ out the window", verb: "he is looking" },
+            { text: "At somebody coming in", verb: null },
+            { text: "It is always nice to see you", verb: null },
+            { text: "Says the man behind the counter", verb: null },
+            { text: "To the woman who has come in", verb: null },
+            { text: "______________ her umbrella", verb: "she is shaking" },
+            { text: "And I look the other way", verb: null },
+            { text: "As ________________ their hellos", verb: "they are kissing" },
+            { text: "And ______________ not to see them", verb: "I'm pretending" },
+            { text: "Instead I pour the milk", verb: null },
+            { text: "I open up the paper", verb: null },
+            { text: "There's a story of an actor", verb: null },
+            { text: "Who had died while he was drinking", verb: null },
+            { text: "It was no one I had heard of", verb: null },
+            { text: "And ___________ to the horoscope", verb: "I'm turning" }, // Corrigido: And I'm turning to the horoscope
+            { text: "And looking for the funnies", verb: null },
+            { text: "When ___________ someone watching me", verb: "I'm feeling" },
+            { text: "And so I raise my head", verb: null },
+            { text: "There's a woman on the outside", verb: null },
+            { text: "Looking inside, does she see me?", verb: null },
+            { text: "No, she does not really see me", verb: null },
+            { text: "'Cause she sees her own reflection", verb: null },
+            { text: "And __________ not to notice", verb: "I'm trying" },
+            { text: "That ______________ up her skirt", verb: "she's hitching up" },
+            { text: "And while ___________________ her stockings", verb: "she's straightening" },
+            { text: "Her hair ________________", verb: "Is getting wet" },
+            { text: "Oh, this rain, it will continue", verb: null },
+            { text: "Through the morning as ____________", verb: "I'm listening" }, // Corrigido: Through the morning as I'm listening
+            { text: "To the bells of the cathedral", verb: null },
+            { text: "_____________ of your voice", verb: "I am thinking" }
+           
+        ];
+
+        const verbsListOrder = [
+            "he is looking", "I am sitting", "I am thinking", "I am waiting", 
+            "I'm feeling", "I'm listening", "I'm pretending", "I'm trying", 
+            "I'm turning", "Is getting wet", "she is shaking", "she's hitching up", 
+            "she's straightening", "they are kissing"
+        ];
+
+        let currentGapIndex = 0;
+        let selectedVerbIndex = 0;
+        const completedVerbs = [];
+        const gapsInOrder = [];
+
+        const lyricsContainer = document.getElementById('lyrics-container');
+        const verbsDisplay = document.getElementById('verbs-list');
+        const music = document.getElementById('bg-music');
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        lyricLines.forEach((lineObj) => {
+            const div = document.createElement('div');
+            div.className = 'lyrics-line';
+            if (lineObj.verb) {
+                const parts = lineObj.text.split(/_+/);
+                const span = document.createElement('span');
+                span.className = 'gap';
+                span.textContent = "_______";
+                span.dataset.correctVerb = lineObj.verb;
+                div.appendChild(document.createTextNode(parts[0]));
+                div.appendChild(span);
+                div.appendChild(document.createTextNode(parts[1]));
+                gapsInOrder.push(span);
+            } else { div.textContent = lineObj.text; }
+            lyricsContainer.appendChild(div);
+        });
+
+        function playSound(type) {
+            if (type === 'success') {
+                const osc = audioCtx.createOscillator();
+                const g = audioCtx.createGain();
+                osc.connect(g); g.connect(audioCtx.destination);
+                osc.frequency.setValueAtTime(330, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(330, audioCtx.currentTime + 0.1);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.2);
+            } else {
+                [0, 0.12].forEach(d => {
+                    const osc = audioCtx.createOscillator();
+                    const g = audioCtx.createGain();
+                    osc.type = 'sawtooth'; osc.connect(g); g.connect(audioCtx.destination);
+                    osc.frequency.setValueAtTime(110, audioCtx.currentTime + d);
+                    osc.start(audioCtx.currentTime + d); osc.stop(audioCtx.currentTime + d + 0.06);
+                });
+            }
+        }
+
+        function renderVerbs() {
+            verbsDisplay.innerHTML = '';
+            verbsListOrder.forEach((verb, index) => {
+                const div = document.createElement('div');
+                div.className = `verb-item ${index === selectedVerbIndex ? 'selected' : ''}`;
+                if (completedVerbs.includes(verb)) div.classList.add('completed');
+                div.textContent = verb;
+                div.onclick = () => { if(!completedVerbs.includes(verb)) { selectedVerbIndex = index; checkVerb(); } };
+                verbsDisplay.appendChild(div);
+            });
+        }
+
+        function checkVerb() {
+            if (currentGapIndex >= gapsInOrder.length) return;
+            const selectedVerb = verbsListOrder[selectedVerbIndex];
+            const targetGap = gapsInOrder[currentGapIndex];
+            const correctVerb = targetGap.dataset.correctVerb;
+
+            if (selectedVerb === correctVerb) {
+                playSound('success');
+                targetGap.textContent = selectedVerb;
+                targetGap.classList.add('correct-gap');
+                completedVerbs.push(selectedVerb);
+                currentGapIndex++;
+                if (currentGapIndex === gapsInOrder.length) document.getElementById('congratulations').style.display = 'block';
+            } else {
+                playSound('error');
+                targetGap.textContent = selectedVerb;
+                targetGap.classList.add('wrong-text');
+                setTimeout(() => {
+                    if (!targetGap.classList.contains('correct-gap')) {
+                        targetGap.textContent = "_______";
+                        targetGap.classList.remove('wrong-text');
+                    }
+                }, 600);
+            }
+            renderVerbs();
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowDown') { e.preventDefault(); selectedVerbIndex = (selectedVerbIndex + 1) % verbsListOrder.length; renderVerbs(); }
+            else if (e.key === 'ArrowUp') { e.preventDefault(); selectedVerbIndex = (selectedVerbIndex - 1 + verbsListOrder.length) % verbsListOrder.length; renderVerbs(); }
+            else if (e.key === 'Enter') checkVerb();
+        });
+
+        document.getElementById('music-control').onclick = () => { music.paused ? music.play() : music.pause(); };
+        music.onended = () => { music.pause(); };
+       // music.onended = () => { music.currentTime = 0; music.play(); };
+
+        renderVerbs();
+    </script>
+</body>
+</html>
