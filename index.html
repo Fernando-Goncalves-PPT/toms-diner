@@ -10,7 +10,7 @@
         body {
             font-family: 'Segoe UI', Tahoma, sans-serif;
             background-color: #f4f7f6;
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
             overflow: hidden; 
@@ -51,6 +51,20 @@
             line-height: 1.25;
             border: 1px solid #ddd;
         }
+        @media (max-width: 600px) {
+            #lyrics-container {
+                grid-template-columns: 1fr; /* Transforma as 2 colunas em 1 no celular */
+                overflow-y: visible; 
+            }
+            .main-layout {
+                flex-direction: column; /* Coloca os verbos acima ou abaixo da letra */
+                overflow: visible;
+            }
+}
+
+
+
+
 
         .verbs-column {
             flex: 0.9;
@@ -91,7 +105,7 @@
         .verb-item.selected { background-color: #3498db; color: white; border-color: #2980b9; }
         .verb-item.completed { text-decoration: line-through; color: #bdc3c7; background: #f9f9f9; cursor: default; }
 
-        footer { text-align: center; padding: 5px; flex-shrink: 0; }
+        footer { text-align: center; padding: 15px; flex-shrink: 0; position: sticky; bottom: 0; background: #f4f7f6; }
 
         #music-control {
             padding: 6px 30px;
