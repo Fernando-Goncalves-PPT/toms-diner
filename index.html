@@ -13,8 +13,9 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            overflow: auto; 
+            overflow-y: auto; 
             padding: 5px 10px;
+            height: auto;
         }
 
         header { 
@@ -51,16 +52,24 @@
             line-height: 1.25;
             border: 1px solid #ddd;
         }
-        @media (max-width: 600px) {
-            #lyrics-container {
-                grid-template-columns: 1fr; /* Transforma as 2 colunas em 1 no celular */
-                overflow-y: visible; 
-            }
-            .main-layout {
-                flex-direction: column; /* Coloca os verbos acima ou abaixo da letra */
-                overflow: visible;
-            }
-}
+/* Quando a tela for menor que 768px (celulares e tablets) */
+@media (max-width: 768px) {
+    #lyrics-container {
+        display: block;          /* Desativa o Grid e as duas colunas */
+        grid-template-columns: 1fr; /* Força uma coluna única */
+        height: auto;
+    }
+    
+    .lyrics-line {
+        height: auto;            /* Permite que a linha cresça se o texto quebrar */
+        margin-bottom: 5px;      /* Dá um espaço entre as frases */
+        padding: 2px 0;
+    }
+
+    .main-layout {
+        flex-direction: column;  /* Coloca a lista de Verbos em cima ou embaixo da letra */
+    }
+}}
 
 
 
